@@ -9,7 +9,6 @@ from email.mime.text import MIMEText
 
 # Configuration: set your search URLs and other parameters
 OLX_URLS = [
-    # "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/krakow/?search%5Bfilter_float_price:to%5D=4000&search%5Bfilter_float_m:from%5D=60"
     "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/krakow/?search%5Bfilter_float_m%3Afrom%5D=60&search%5Bfilter_float_price%3Ato%5D=4000"
 ]
 OTODOM_URLS = [
