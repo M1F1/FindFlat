@@ -30,7 +30,7 @@ def scrape_olx():
         while True:
             # Append page param properly (use "&" if base_url already has "?" in it)
             sep = "&" if "?" in base_url else "?"
-            url = f"{base_url}={page}"
+            url = f"{base_url}{sep}page={page}"
             try:
                 resp = requests.get(url, headers=headers, timeout=10)
             except Exception as e:
@@ -107,6 +107,8 @@ def scrape_otodom():
             #html body div#__next div.css-1bx5ylf.e1xea6843 main.css-1nw9pmu.ej9hb240 div.css-1n25z8k.e1xea6840 div.css-79elbk.e1xea6841 div.css-feokcq.e1xea6844 div.e1fx09lx0.css-yqh7ml div.css-1i43dhb.e1fx09lx1 div div.css-18budxx.e7pblr0 ul.e7pblr4.css-iiviho
             if not anchors:
                 break  # no listings on this page
+            if len(offers) >= 200:
+                break
             for a in anchors:
                 link = "https://www.otodom.pl" + a.get("href", "")
                 uuid = link[-7:]  
@@ -137,8 +139,6 @@ def scrape_otodom():
             # el = soup.select_one('a.css-qbxu1w[data-page="6"]')
             # find the <li> that has the “active” class
             print(f"Scraped Otodom page {page} with {len(anchors)} listings")
-            if len(offers) > 200:
-                break
     return offers
 
 # Function to write new offers to Google Sheets
@@ -154,13 +154,14 @@ def write_to_sheets(new_offers):
 # Function to send notification email via Gmail
 def send_email(new_offers):
     if not new_offers or not os.getenv("GMAIL_USER") or not os.getenv("GMAIL_PASSWORD"):
+        print("No new offers to send or Gmail credentials not set.")
         return
     gmail_user = os.getenv("GMAIL_USER")
     gmail_pass = os.getenv("GMAIL_PASSWORD")
     subject = f"Nowe oferty nieruchomości: {len(new_offers)} nowe ogłoszenia"
     lines = []
-    for title, price, area, link, date in new_offers:
-        line = f"- {title} | {price} | {area}"
+    for uuid, title, price, area, link, date in new_offers:
+        line = f"- {uuid} | {title} | {price} | {area}"
         if date:
             line += f" | {date}"
         line += f" | {link}"
@@ -181,19 +182,17 @@ def send_email(new_offers):
 
 # Main function to orchestrate the scraping and notification
 def main():
-    # olx_offers = scrape_olx()
-    # print("OLX Offers:")
-    # print(olx_offers)
-    # print(f"Found {len(olx_offers)} offers on OLX")
+    olx_offers = scrape_olx()
+    print("OLX Offers:")
+    print(f"Found {len(olx_offers)} offers on OLX")
     otodom_offers = scrape_otodom()
     print("Otodom Offers:")
-    print(otodom_offers)
     print(f"Found {len(otodom_offers)} offers on Otodom")
     # # Combine and deduplicate offers by link
     # all_offers = []
-    # seen_links = set()k
+    # seen_links = set()
     # for offer in olx_offers + otodom_offers:
-    #     link = offer[3]
+    #     link = offer[4]
     #     if link and link not in seen_links:
     #         seen_links.add(link)
     #         all_offers.append(offer)
