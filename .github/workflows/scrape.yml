@@ -24,7 +24,7 @@ jobs:
 
       - name: Create Google credentials file
         run: echo "${{ secrets.GSPREAD_CREDENTIALS }}" > service_account.json
-      - name: Debug: show Google creds
+      - name: show Google creds
         run: |
           echo "=== BEGIN CREDS ==="
           cat service_account.json || true
