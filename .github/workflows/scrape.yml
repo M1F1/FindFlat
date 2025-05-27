@@ -23,12 +23,9 @@ jobs:
           pip install -r requirements.txt
 
       - name: Create Google credentials file
-        run: echo "${{ secrets.GSPREAD_CREDENTIALS }}" > service_account.json
-      - name: show Google creds
         run: |
-          echo "=== BEGIN CREDS ==="
-          cat service_account.json || true
-          echo "==== END CREDS ===="
+          echo "${{ secrets.GSPREAD_CREDENTIALS_B64 }}" \
+            | base64 --decode > service_account.json
 
       - name: Run scraper
         env:
