@@ -23,7 +23,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Write secret file
-        run: printf '%s' "$GSPREAD_CREDENTIALS" | base64 --decode > service_account.json
+        run: printf '%s' "$GSPREAD_CREDENTIALS" > service_account.json
 
 
       - name: Run scraper
