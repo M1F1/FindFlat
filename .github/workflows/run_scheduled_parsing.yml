@@ -22,7 +22,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Create Google credentials file
-        run: echo "${{ secrets.GSPREAD_CREDENTIALS }}" > creds.json
+        run: echo "${{ secrets.GSPREAD_CREDENTIALS }}" > service_account.json
 
       - name: Run scraper
         env:

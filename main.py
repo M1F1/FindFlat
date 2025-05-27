@@ -149,7 +149,7 @@ def scrape_otodom():
 def write_to_sheets(new_offers):
     if not new_offers:
         return
-    gc = gspread.service_account()
+    gc = gspread.service_account(filename="service_account.json")
     sh = gc.open_by_key(os.getenv("SHEET_ID"))
     worksheet = sh.worksheet(os.getenv("SHEET_NAME")) if os.getenv("SHEET_NAME") else sh.sheet1
     worksheet.append_rows(new_offers, value_input_option="RAW")
@@ -208,7 +208,7 @@ def main():
     # Check which offers are new by comparing with Google Sheet
     new_offers = []
     if all_offers:
-        gc = gspread.service_account()
+        gc = gspread.service_account(filename="service_account.json")
         sh = gc.open_by_key(os.getenv("SHEET_ID"))
         worksheet = sh.worksheet(os.getenv("SHEET_NAME")) if os.getenv("SHEET_NAME") else sh.sheet1
         try:
