@@ -22,10 +22,8 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Decode Google creds
-        run: |
-          printf '%s' "${{ secrets.GSPREAD_CREDENTIALS_B64 }}" \
-            | base64 --decode > service_account.json
+      - name: Write secret file
+        run: echo "${{ secrets.GSPREAD_CREDENTIALS }}" > service_account.json
 
       - name: Run scraper
         env:
