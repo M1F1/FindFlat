@@ -22,9 +22,9 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Create Google credentials file
+      - name: Decode Google creds
         run: |
-          echo "${{ secrets.GSPREAD_CREDENTIALS_B64 }}" \
+          printf '%s' "${{ secrets.GSPREAD_CREDENTIALS_B64 }}" \
             | base64 --decode > service_account.json
 
       - name: Run scraper
