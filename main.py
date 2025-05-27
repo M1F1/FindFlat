@@ -4,21 +4,22 @@ import json
 import smtplib
 import requests
 from bs4 import BeautifulSoup
-# import gspread
+import gspread
 from email.mime.text import MIMEText
 
 # Configuration: set your search URLs and other parameters
 OLX_URLS = [
-    "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/krakow/?search%5Bfilter_float_m%3Afrom%5D=60&search%5Bfilter_float_price%3Ato%5D=4000"
+"https://www.olx.pl/nieruchomosci/mieszkania/wynajem/krakow/?search%5Bfilter_float_m%3Afrom%5D=60&search%5Bfilter_float_price%3Ato%5D=4000"
 ]
 OTODOM_URLS = [
     "https://www.otodom.pl/pl/wyniki/wynajem/mieszkanie/malopolskie/krakow/krakow/krakow?limit=36&priceMax=4000&areaMin=60&by=LATEST&direction=DESC&page=1"
 ]
-
-# Google Sheets and Gmail credentials via environment variables:
-# SHEET_ID (Google Sheet ID), SHEET_NAME (optional sheet name),
-# GSPREAD_CREDENTIALS (JSON service account credentials),
-# GMAIL_USER (your Gmail address), GMAIL_PASSWORD (App Password).
+#TODO: add env variables for URLs
+# os.environ["OLX_URLS"] = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/krakow/?search%5Bfilter_float_m%3Afrom%5D=60&search%5Bfilter_float_price%3Ato%5D=4000"
+# os.environ["OTODOM_URLS"] = "https://www.otodom.pl/pl/wyniki/wynajem/mieszkanie/malopolskie/krakow/krakow/krakow?limit=36&priceMax=4000&areaMin=60&by=LATEST&direction=DESC&page=1"
+os.environ["SHEET_ID"] = "10lQL1ut3XgoUzv3qEE22BwHvf-rbXaZDR8nFvaixk24"
+os.environ["SHEET_NAME"] = "candidate_generation"
+# check codespace/gspread/service_account.json
 
 # Function to scrape OLX listings
 def scrape_olx():
@@ -46,7 +47,10 @@ def scrape_olx():
                 title_tag = card.find("h6")
                 title = title_tag.get_text(strip=True) if title_tag else ""
                 link_tag = card.select_one('a:not(:has(img))')
-                link = "https://www.olx.pl" + link_tag["href"] if link_tag else ""
+                "https://www.olx.pl"
+                link = link_tag["href"] if link_tag else ""
+                if not link.startswith("http"):
+                    link = "https://www.olx.pl" + link
                 # /d/oferta/4-pokoje-i-balkon-i-klimatyzacja-i-88m2-i-chrobrego-CID3-ID15NLb7.html
                 # extract title from link using regex only last part after last slash and CID3
                 import re
@@ -110,6 +114,7 @@ def scrape_otodom():
                 break
             for a in anchors:
                 link = "https://www.otodom.pl" + a.get("href", "")
+
                 uuid = link[-7:]  
                 title = a.get_text(strip=True)
                 # Find parent container of the listing (article or list item)
@@ -144,8 +149,7 @@ def scrape_otodom():
 def write_to_sheets(new_offers):
     if not new_offers:
         return
-    creds_json = os.getenv("GSPREAD_CREDENTIALS")
-    gc = gspread.service_account_from_dict(json.loads(creds_json)) if creds_json else gspread.service_account()
+    gc = gspread.service_account()
     sh = gc.open_by_key(os.getenv("SHEET_ID"))
     worksheet = sh.worksheet(os.getenv("SHEET_NAME")) if os.getenv("SHEET_NAME") else sh.sheet1
     worksheet.append_rows(new_offers, value_input_option="RAW")
@@ -171,11 +175,14 @@ def send_email(new_offers):
     msg["Subject"] = subject
     msg["From"] = gmail_user
     msg["To"] = gmail_user
+    import smtplib, ssl
     try:
-        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-        server.login(gmail_user, gmail_pass)
-        server.send_message(msg)
-        server.quit()
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            print("Connecting to Gmail SMTP server...")
+            print("Logging in to Gmail...")
+            server.starttls(context=ssl.create_default_context())
+            server.login(gmail_user, gmail_pass)
+            server.send_message(msg)
     except Exception as e:
         print(f"Error sending email: {e}")
 
@@ -187,33 +194,38 @@ def main():
     otodom_offers = scrape_otodom()
     print("Otodom Offers:")
     print(f"Found {len(otodom_offers)} offers on Otodom")
-    # # Combine and deduplicate offers by link
-    # all_offers = []
-    # seen_links = set()
-    # for offer in olx_offers + otodom_offers:
-    #     link = offer[4]
-    #     if link and link not in seen_links:
-    #         seen_links.add(link)
-    #         all_offers.append(offer)
-    # # Check which offers are new by comparing with Google Sheet
-    # new_offers = []
-    # if all_offers:
-    #     creds_json = os.getenv("GSPREAD_CREDENTIALS")
-    #     gc = gspread.service_account_from_dict(json.loads(creds_json)) if creds_json else gspread.service_account()
-    #     sh = gc.open_by_key(os.getenv("SHEET_ID"))
-    #     worksheet = sh.worksheet(os.getenv("SHEET_NAME")) if os.getenv("SHEET_NAME") else sh.sheet1
-    #     try:
-    #         existing_links = worksheet.col_values(4)  # assuming Link is 4th column (A=1, B=2, C=3, D=4)
-    #     except Exception:
-    #         existing_links = []
-    #     existing_links = {lnk.strip() for lnk in existing_links if lnk and lnk.strip().startswith("http")}
-    #     for offer in all_offers:
-    #         if offer[3] not in existing_links:
-    #             new_offers.append(offer)
-    # # Write new offers to sheet and send email notification
-    # if new_offers:
-    #     write_to_sheets(new_offers)
-    #     send_email(new_offers)
+    # Combine and deduplicate offers by link
+    all_offers = []
+    seen_links = set()
+    for i, offer in enumerate(olx_offers + otodom_offers):
+        link = offer[4]
+        print(f"Processing offer {i}: {offer[1]} | Link: {link}")
+        if link and link not in seen_links:
+            seen_links.add(link)
+            all_offers.append(offer)
+    print(f"Total unique offers found: {len(seen_links)}")
+
+    # Check which offers are new by comparing with Google Sheet
+    new_offers = []
+    if all_offers:
+        gc = gspread.service_account()
+        sh = gc.open_by_key(os.getenv("SHEET_ID"))
+        worksheet = sh.worksheet(os.getenv("SHEET_NAME")) if os.getenv("SHEET_NAME") else sh.sheet1
+        try:
+            existing_links = worksheet.col_values(5)  # assuming Link is 4th column (A=1, B=2, C=3, D=4)
+            print(f"Found {len(existing_links)} existing links in Google Sheets")
+            print(f"Existing links: {existing_links[:10]}...")  # Print first 10 for brevity
+        except Exception:
+            existing_links = []
+        existing_links = {lnk.strip() for lnk in existing_links if lnk and lnk.strip().startswith("http")}
+        for offer in all_offers:
+            if offer[4] not in existing_links:
+                new_offers.append(offer)
+        print(f"Found {len(new_offers)} new offers not in Google Sheets")
+    # Write new offers to sheet and send email notification
+    if new_offers:
+        write_to_sheets(new_offers)
+        send_email(new_offers)
 
 if __name__ == "__main__":
     main()
