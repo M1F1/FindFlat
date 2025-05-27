@@ -3,7 +3,7 @@ name: Scrape and Notify
 on:
   workflow_dispatch:    # umożliwia ręczne wywołanie przez przycisk „Run workflow”
   schedule:
-    - cron: '*/5 * * * *'  # co 5 min o pełnej godzinie (UTC)
+    - cron: '0 * * * *'  # co 5 min o pełnej godzinie (UTC)
 
 jobs:
   scrape:
