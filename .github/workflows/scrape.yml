@@ -2,7 +2,7 @@ name: Scrape and Notify
 
 on:
   schedule:
-    - cron: '0 * * * *'  # co godzinę o pełnej godzinie (UTC)
+    - cron: '*/5 * * * *'  # co 5 min o pełnej godzinie (UTC)
 
 jobs:
   scrape:
