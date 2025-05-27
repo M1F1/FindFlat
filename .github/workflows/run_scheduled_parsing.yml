@@ -1,0 +1,33 @@
+name: Scrape and Notify
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # co godzinę o pełnej godzinie (UTC)
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.1'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create Google credentials file
+        run: echo "${{ secrets.GSPREAD_CREDENTIALS }}" > creds.json
+
+      - name: Run scraper
+        env:
+          GSPREAD_CREDENTIALS: ${{ secrets.GSPREAD_CREDENTIALS }}
+          SHEET_ID:             ${{ secrets.SHEET_ID }}
+          GMAIL_USER:           ${{ secrets.GMAIL_USER }}
+          GMAIL_PASSWORD:       ${{ secrets.GMAIL_PASSWORD }}
+        run: python main.py
