@@ -82,7 +82,8 @@ def scrape_olx():
                     if text.endswith("m²") and "zł" in text:
                         area = text.split("-")[0].strip()  # e.g. "35 m²" from "35 m² - 10857 zł/m²"
                         break
-                offers.append([uuid, title, price, area, link, date_added])
+                send_to_candidate_filtering = False
+                offers.append([uuid, title, price, area, link, date_added, send_to_candidate_filtering])
             page += 1
             print(f"Scraped OLX page {page} with {len(cards)} listings")
     return offers
@@ -138,7 +139,8 @@ def scrape_otodom():
                             if match:
                                 area = match.group(0)
                                 break
-                offers.append([uuid, title, price, area, link, date_added])
+                send_to_candidate_filtering = False
+                offers.append([uuid, title, price, area, link, date_added, send_to_candidate_filtering])
             page += 1
             # el = soup.select_one('a.css-qbxu1w[data-page="6"]')
             # find the <li> that has the “active” class
