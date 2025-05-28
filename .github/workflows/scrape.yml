@@ -22,12 +22,13 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Write secret file
-        run: echo "$GSPREAD_CREDENTIALS" > service_account.json
+      - name: Decrypt gspread secret
+        run: ./decrypt_gspread_secrets.sh
+        env:
+          GSPREAD_CREDENTIALS_PASSPHRASE: ${{ secrets.GSPREAD_CREDENTIALS_PASSPHRASE }}
 
       - name: Run scraper
         env:
-          GSPREAD_CREDENTIALS: ${{ secrets.GSPREAD_CREDENTIALS }}
           SHEET_ID:             ${{ secrets.SHEET_ID }}
           GMAIL_USER:           ${{ secrets.GMAIL_USER }}
           GMAIL_PASSWORD:       ${{ secrets.GMAIL_PASSWORD }}
