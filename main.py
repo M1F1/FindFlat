@@ -165,7 +165,7 @@ def send_email(new_offers):
     gmail_pass = os.getenv("GMAIL_PASSWORD")
     subject = f"Nowe oferty nieruchomości: {len(new_offers)} nowe ogłoszenia"
     lines = []
-    for uuid, title, price, area, link, date in new_offers:
+    for uuid, title, price, area, link, date, _ in new_offers:
         line = f"- {uuid} | {title} | {price} | {area}"
         if date:
             line += f" | {date}"
