@@ -188,10 +188,6 @@ def send_email(new_offers):
     except Exception as e:
         print(f"Error sending email: {e}")
 
-def remove_html_suffix(s: str) -> str:
-    if s.endswith('.html'):
-        return s[:-5]  # usuwa ostatnie 5 znaków: ".html"
-    return s
 
 # Main function to orchestrate the scraping and notification
 def main():
@@ -227,8 +223,6 @@ def main():
         existing_links = {lnk.strip() for lnk in existing_links if lnk and lnk.strip().startswith("http")}
         for offer in all_offers:
             if offer[4] not in existing_links and "hpr" not in offer[4]:  # filter out hpr links
-                link_without_html = remove_html_suffix(offer[4])
-                offer[4] = link_without_html
                 new_offers.append(offer)
         print(f"Found {len(new_offers)} new offers not in Google Sheets")
     # Write new offers to sheet and send email notification
