@@ -8,11 +8,15 @@ import gspread
 from email.mime.text import MIMEText
 
 # Configuration: set your search URLs and other parameters
+# OLX old link
+# "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/krakow/?search%5Bfilter_float_m%3Afrom%5D=60&search%5Bfilter_float_price%3Ato%5D=4000"
 OLX_URLS = [
-"https://www.olx.pl/nieruchomosci/mieszkania/wynajem/krakow/?search%5Bfilter_float_m%3Afrom%5D=60&search%5Bfilter_float_price%3Ato%5D=4000"
+"https://www.olx.pl/nieruchomosci/mieszkania/wynajem/krakow/?search%5Bfilter_float_price:to%5D=4000&search%5Bfilter_float_m:from%5D=60&search%5Bfilter_enum_rooms%5D%5B0%5D=three&search%5Bfilter_enum_rooms%5D%5B1%5D=four&search%5Bfilter_enum_winda%5D%5B0%5D=Tak&search%5Bfilter_enum_parking%5D%5B0%5D=w%20gara%C5%BCu&search%5Bfilter_enum_parking%5D%5B1%5D=parking%20strze%C5%BCony"
 ]
+# old OTO dom link
+# "https://www.otodom.pl/pl/wyniki/wynajem/mieszkanie/malopolskie/krakow/krakow/krakow?limit=36&priceMax=4000&areaMin=60&by=LATEST&direction=DESC&page=1"
 OTODOM_URLS = [
-    "https://www.otodom.pl/pl/wyniki/wynajem/mieszkanie/malopolskie/krakow/krakow/krakow?limit=36&priceMax=4000&areaMin=60&by=LATEST&direction=DESC&page=1"
+    "https://www.otodom.pl/pl/wyniki/wynajem/mieszkanie/malopolskie/krakow/krakow/krakow?limit=36&priceMax=4000&areaMin=60&roomsNumber=%5BTHREE%2CFOUR%2CFIVE%2CSIX_OR_MORE%5D&extras=%5BGARAGE%2CBALCONY%2CLIFT%5D&by=DEFAULT&direction=DESC&viewType=listing"
 ]
 #TODO: add env variables for URLs
 # os.environ["OLX_URLS"] = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/krakow/?search%5Bfilter_float_m%3Afrom%5D=60&search%5Bfilter_float_price%3Ato%5D=4000"
