@@ -89,6 +89,8 @@ def scrape_olx():
                 send_to_candidate_filtering = False
                 offers.append([uuid, title, price, area, link, date_added, send_to_candidate_filtering])
             page += 1
+            if len(offers) >= 100:
+                break
             print(f"Scraped OLX page {page} with {len(cards)} listings")
     return offers
 
@@ -115,7 +117,7 @@ def scrape_otodom():
             #html body div#__next div.css-1bx5ylf.e1xea6843 main.css-1nw9pmu.ej9hb240 div.css-1n25z8k.e1xea6840 div.css-79elbk.e1xea6841 div.css-feokcq.e1xea6844 div.e1fx09lx0.css-yqh7ml div.css-1i43dhb.e1fx09lx1 div div.css-18budxx.e7pblr0 ul.e7pblr4.css-iiviho
             if not anchors:
                 break  # no listings on this page
-            if len(offers) >= 200:
+            if len(offers) >= 100:
                 break
             for a in anchors:
                 link = "https://www.otodom.pl" + a.get("href", "")
