@@ -216,13 +216,15 @@ def main():
         worksheet = sh.worksheet(os.getenv("SHEET_NAME")) if os.getenv("SHEET_NAME") else sh.sheet1
         try:
             existing_links = worksheet.col_values(5)  # assuming Link is 4th column (A=1, B=2, C=3, D=4)
+            existing_ids = worksheet.col_values(1)
             print(f"Found {len(existing_links)} existing links in Google Sheets")
             print(f"Existing links: {existing_links[:10]}...")  # Print first 10 for brevity
         except Exception:
+            existing_ids = []
             existing_links = []
         existing_links = {lnk.strip() for lnk in existing_links if lnk and lnk.strip().startswith("http")}
         for offer in all_offers:
-            if offer[4] not in existing_links and "hpr" not in offer[4]:  # filter out hpr links
+            if offer[4] not in existing_links and "hpr" not in offer[4] and offer[0] not in existing_ids:  # filter out hpr linksA
                 new_offers.append(offer)
         print(f"Found {len(new_offers)} new offers not in Google Sheets")
     # Write new offers to sheet and send email notification
