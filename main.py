@@ -16,14 +16,15 @@ OLX_URLS = [
 # old OTO dom link
 # "https://www.otodom.pl/pl/wyniki/wynajem/mieszkanie/malopolskie/krakow/krakow/krakow?limit=36&priceMax=4000&areaMin=60&by=LATEST&direction=DESC&page=1"
 OTODOM_URLS = [
-    "https://www.otodom.pl/pl/wyniki/wynajem/mieszkanie/malopolskie/krakow/krakow/krakow?limit=36&priceMax=4000&areaMin=60&roomsNumber=%5BTHREE%2CFOUR%2CFIVE%2CSIX_OR_MORE%5D&extras=%5BGARAGE%2CLIFT%2CBALCONY%5D&by=LATEST&direction=DESC&viewType=listing"
+    "https://www.otodom.pl/pl/wyniki/wynajem/mieszkanie/malopolskie/krakow/krakow/krakow?limit=48&priceMax=4000&areaMin=60&roomsNumber=%5BTHREE%2CFOUR%2CFIVE%2CSIX_OR_MORE%5D&extras=%5BGARAGE%2CLIFT%2CBALCONY%5D&by=LATEST&direction=DESC&viewType=listing"
 ]
 #TODO: add env variables for URLs
 # os.environ["OLX_URLS"] = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/krakow/?search%5Bfilter_float_m%3Afrom%5D=60&search%5Bfilter_float_price%3Ato%5D=4000"
 # os.environ["OTODOM_URLS"] = "https://www.otodom.pl/pl/wyniki/wynajem/mieszkanie/malopolskie/krakow/krakow/krakow?limit=36&priceMax=4000&areaMin=60&by=LATEST&direction=DESC&page=1"
 os.environ["SHEET_ID"] = "10lQL1ut3XgoUzv3qEE22BwHvf-rbXaZDR8nFvaixk24"
 os.environ["SHEET_NAME"] = "candidate_generation"
-MAX_OFFERS = 48  # maximum number of offers to scrape per site
+MAX_OFFERS = 48  # maximum number of offers to scrape per url
+MAX_PAGES = 2
 # check codespace/gspread/service_account.json
 
 # Function to scrape OLX listings
@@ -118,7 +119,7 @@ def scrape_otodom():
             #html body div#__next div.css-1bx5ylf.e1xea6843 main.css-1nw9pmu.ej9hb240 div.css-1n25z8k.e1xea6840 div.css-79elbk.e1xea6841 div.css-feokcq.e1xea6844 div.e1fx09lx0.css-yqh7ml div.css-1i43dhb.e1fx09lx1 div div.css-18budxx.e7pblr0 ul.e7pblr4.css-iiviho
             if not anchors:
                 break  # no listings on this page
-            if len(offers) >= MAX_OFFERS:
+            if len(page) >= MAX_PAGES:
                 break
             for a in anchors:
                 link = "https://www.otodom.pl" + a.get("href", "")
